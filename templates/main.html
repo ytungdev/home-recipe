@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>HOME-MENU</h2>
+    <hr>
+    <ul>
+        {% for dish in data['dish'] %}
+            <li>{{dish["name"]}} {{dish["name_chi"]}}
+                <ul>
+                    {% for ing in dish["ingredient"]  %}
+                        <li>{{ing["name"]}} {{ing["name_chi"]}}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <ul>
+        {% for ing in data['ingredient'] %}
+            <li>{{ing["name"]}} {{ing["name_chi"]}}
+            </li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <p>Add ingredient</p>
+    <form method="post" action="{{url_for('add_ingredient')}}">
+        <label>
+            <span>Name</span>
+            <input type="text" name="name">
+        </label>
+        <label>
+            <span>Name_chi</span>
+            <input type="text" name="name_chi">
+        </label>
+        <input type="submit" value="add">
+    </form>
+    <hr>
+    <p>Add dish</p>
+    <form method="post" action="{{url_for('add_dish')}}">
+        <label>
+            <span>Name</span>
+            <input type="text" name="name">
+        </label>
+        <label>
+            <span>Name_chi</span>
+            <input type="text" name="name_chi">
+        </label>
+        <input type="submit" value="add">
+    </form>
+</body>
+</html>
