@@ -28,7 +28,15 @@ class DBconnection:
 
 
 if __name__ == "__main__":
-    conn = DBconnection("bolt://localhost:7687", "neo4j", "password")
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    URL = os.getenv('DATABASE_URL')
+    USERNAME = os.getenv('DATABASE_USERNAME')
+    PASSWORD = os.getenv('DATABASE_PASSWORD')
+    conn = DBconnection(URL, USERNAME, PASSWORD)
     res = conn.query('MATCH (n) RETURN n')
-    print(res[0])
+    for r in res:
+        print(r)
     conn.close()

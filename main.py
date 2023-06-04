@@ -1,12 +1,19 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, flash
 from dbConnection import DBconnection
 from models import Dish, Ingredient
+import os
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
 app.secret_key = b'1233211234567'
 
-db = DBconnection("bolt://localhost:7687", "neo4j", "password")
+
+load_dotenv()
+URL = os.getenv('DATABASE_URL')
+USERNAME = os.getenv('DATABASE_USERNAME')
+PASSWORD = os.getenv('DATABASE_PASSWORD')
+db = DBconnection(URL, USERNAME, PASSWORD)
 
 
 @app.route('/')
