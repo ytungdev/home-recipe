@@ -8,12 +8,17 @@
     <title>Document</title>
     <style>
         body {
-            padding: 20px 200px;
+            padding: 5vh 25vw;
         }
 
         .form {
             border: 1px solid black;
             padding: 10px;
+        }
+
+        .name{
+            display: inline-block;
+            width: 100px
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
@@ -31,7 +36,9 @@
                     $('#suggestions').html("");
                     for (i of res) {
                         if (!(selected.includes(i.name))) {
-                            $('#suggestions').append(`<p>${i.name} ${i.name_chi} 
+                            $('#suggestions').append(`<p>
+                                <span class="name">${i.name}</span>
+                                <span class="name"> ${i.name_chi}</span>
                                 <input type="button" value="+" 
                                     data-name="${i.name}" 
                                     data-name_chi="${i.name_chi}" 
@@ -65,13 +72,23 @@
             let name = item.dataset.name;
             let name_chi = item.dataset.name_chi;
             selected.push(name)
-            $('#selected').append(`<p>${name} ${name_chi}
+            $('#selected').append(`<p>
+                    <span class="name">${i.name}</span>
+                    <span class="name"> ${i.name_chi}</span>
                     <input type="hidden" value="${name}" name="ingredients[]">
                     <input type="button" value="x" 
+                        data-name="${name}" 
                         onclick="remove(this)">
                 </p>`)
             $('#inp').val("");
             $('#suggestions').html('');
+        }
+
+        function remove(item){
+            let name = item.dataset.name;
+            const index = selected.indexOf(name);
+            selected.splice(index, 1);
+            item.parentElement.remove();
         }
     </script>
 </head>
@@ -103,6 +120,17 @@
                 <input type="text" name="name_chi">
             </label>
             <input type="submit" value="add">
+            {% with msgs = get_flashed_messages(category_filter=["dish"]) %}
+            {% if msgs %}
+            <div class="alert-message block-message error">
+                <ul>
+                    {% for msg in msgs %}
+                    <li>{{ msg }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% endwith %}
             <br>
             <label>
                 <span>Ingredient</span>

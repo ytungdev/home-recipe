@@ -24,6 +24,8 @@ class Ingredient:
         return [self.serialize_reulst(record.data()) for record in res]
 
     def add(self, name, name_chi):
+        if name == '':
+            return 'name error'
         q = f'CREATE (i:Ingredient{{name:\"{name}\",name_chi:\"{name_chi}\"}}) RETURN i as result'
         res = db.query(q)
         # print(q, res)
@@ -66,6 +68,8 @@ class Dish:
         return [self.serialize_reulst(record.data()) for record in res]
 
     def add(self, name, name_chi, ingredients):
+        if name == '':
+            return 'name error'
         for i in ingredients:
             q = f"""
             MERGE (i:Ingredient{{name:"{i}"}})

@@ -46,8 +46,9 @@ def add_dish():
     print(f"add d : '{name}', '{name_chi}', '{ingredients}'")
     print(res)
     if not res:
-        print('no')
-        flash('Invalid ingredient', 'ingredient')
+        flash('Invalid dish', 'dish')
+    if res == 'name error':
+        flash('Invalid dish : name is required', 'dish')
     return redirect(url_for('index'))
     
 @app.post('/add/ingredient')
@@ -58,8 +59,9 @@ def add_ingredient():
     res = Ingredient().add(name, name_chi)
     print(res)
     if not res:
-        print('no')
-        flash('Invalid ingredient', 'ingredient')
+        flash('Invalid ingredient : ingredient already exist', 'ingredient')
+    if res == 'name error':
+        flash('Invalid ingredient : name is required', 'ingredient')
     return redirect(url_for('index'))
 
 @app.post('/search')
@@ -67,9 +69,6 @@ def dbSearch():
     text = request.json['data']
     result = Ingredient().search(text)
     return jsonify(result)
-    # print(request.json)
-    # text = request.json['data']
-    # return jsonify(text)
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
