@@ -24,11 +24,20 @@ class Ingredient:
         return [self.serialize_reulst(record.data()) for record in res]
 
     def add(self, name, name_chi):
-        q = f'CREATE (d:Ingredient{{name:\"{name}\",name_chi:\"{name_chi}\"}}) RETURN d as result'
+        q = f'CREATE (i:Ingredient{{name:\"{name}\",name_chi:\"{name_chi}\"}}) RETURN i as result'
+        res = db.query(q)
+        # print(q, res)
+        if res:
+            return [self.serialize_reulst(record.data()) for record in res]
+        return False
+
+    def search(self, text):
+        if text == '':
+            return []
+        q = f'CALL db.index.fulltext.queryNodes("ingredientName", "*{text}*") YIELD node, score RETURN node.name as name, node.name_chi as name_chi'
         res = db.query(q)
         print(q, res)
-        return [self.serialize_reulst(record.data()) for record in res]
-
+        return [record.data() for record in res]
 
 class Dish:
     @staticmethod
@@ -56,8 +65,14 @@ class Dish:
         res = db.query(q)
         return [self.serialize_reulst(record.data()) for record in res]
 
-    def add(self, name, name_chi):
-        q = f'CREATE (d:Dish{{name:\"{name}\",name_chi:\"{name_chi}\"}}) RETURN d as result'
-        # print(q)
-        res = db.query(q)
-        return [self.serialize_reulst(record.data()) for record in res]
+    def add(self, name, name_chi, ingredients):
+        for i in ingredients:
+            q = f"""
+            MERGE (i:Ingredient{{name:"{i}"}})
+            MERGE (d:Dish{{name:"{name}",name_chi:"{name_chi}"}})
+            MERGE (d)-[:USE]->(i)
+            RETURN d
+            """
+            print(q)
+            res = db.query(q)
+        return True

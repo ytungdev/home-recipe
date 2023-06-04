@@ -4,7 +4,10 @@ from neo4j import GraphDatabase
 class DBconnection:
 
     def __init__(self, uri, user, password):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        conn = self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        if not conn:
+            print("no connection")
+            return False
 
     def close(self):
         self.driver.close()

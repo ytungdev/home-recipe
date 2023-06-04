@@ -1,57 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        body {
+            padding: 20px 200px;
+        }
+
+        .form {
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        let selected = []
+
+        function search(text) {
+            $.ajax({
+                type: "POST",
+                url: "{{url_for('dbSearch')}}",
+                data: JSON.stringify({ 'data': text }),
+                contentType: 'application/json;charset=UTF-8',
+                success: function (res) {
+                    // console.log(res)
+                    $('#suggestions').html("");
+                    for (i of res) {
+                        if (!(selected.includes(i.name))) {
+                            $('#suggestions').append(`<p>${i.name} ${i.name_chi} 
+                                <input type="button" value="+" 
+                                    data-name="${i.name}" 
+                                    data-name_chi="${i.name_chi}" 
+                                    onclick="add(this)">
+                            </p>`)
+                        }
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                },
+            });
+        }
+
+        function add(item) {
+            let name = item.dataset.name;
+            let name_chi = item.dataset.name_chi;
+            selected.push(name)
+            $('#selected').append(`<p>${name} ${name_chi}
+                    <input type="hidden" value="${name}" name="ingredients[]">
+                    <input type="button" value="x" 
+                        onclick="remove(this)">
+                </p>`)
+            $('#inp').val("");
+            $('#suggestions').html('');
+        }
+    </script>
 </head>
+
 <body>
     <h2>HOME-MENU</h2>
     <hr>
+    <h4>Dish</h4>
     <ul>
         {% for dish in data['dish'] %}
-            <li>{{dish["name"]}} {{dish["name_chi"]}}
-                <ul>
-                    {% for ing in dish["ingredient"]  %}
-                        <li>{{ing["name"]}} {{ing["name_chi"]}}</li>
-                    {% endfor %}
-                </ul>
-            </li>
+        <li>{{dish["name"]}} {{dish["name_chi"]}}
+            <ul>
+                {% for ing in dish["ingredient"] %}
+                <li>{{ing["name"]}} {{ing["name_chi"]}}</li>
+                {% endfor %}
+            </ul>
+        </li>
         {% endfor %}
     </ul>
+    <div class="form">
+        <span><b>Add</b></span>
+        <form method="post" action="{{url_for('add_dish')}}">
+            <label>
+                <span>Name</span>
+                <input type="text" name="name">
+            </label>
+            <label>
+                <span>Name_chi</span>
+                <input type="text" name="name_chi">
+            </label>
+            <input type="submit" value="add">
+            <br>
+            <label>
+                <span>Ingredient</span>
+            </label>
+            <input id="inp" type="text" onkeyup="search(this.value)">
+            <div id="selected"></div>
+            <div id="suggestions"></div>
+        </form>
+    </div>
     <hr>
+    <h4>Ingredient</h4>
     <ul>
         {% for ing in data['ingredient'] %}
-            <li>{{ing["name"]}} {{ing["name_chi"]}}
-            </li>
+        <li>{{ing["name"]}} {{ing["name_chi"]}}
+        </li>
         {% endfor %}
     </ul>
+    <div class="form">
+        <span><b>Add</b></span>
+        <form method="post" action="{{url_for('add_ingredient')}}">
+            <label>
+                <span>Name</span>
+                <input type="text" name="name">
+            </label>
+            <label>
+                <span>Name_chi</span>
+                <input type="text" name="name_chi">
+            </label>
+            <input type="submit" value="add">
+            {% with msgs = get_flashed_messages(category_filter=["ingredient"]) %}
+            {% if msgs %}
+            <div class="alert-message block-message error">
+                <ul>
+                    {% for msg in msgs %}
+                    <li>{{ msg }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </form>
+    </div>
     <hr>
-    <p>Add ingredient</p>
-    <form method="post" action="{{url_for('add_ingredient')}}">
-        <label>
-            <span>Name</span>
-            <input type="text" name="name">
-        </label>
-        <label>
-            <span>Name_chi</span>
-            <input type="text" name="name_chi">
-        </label>
-        <input type="submit" value="add">
-    </form>
-    <hr>
-    <p>Add dish</p>
-    <form method="post" action="{{url_for('add_dish')}}">
-        <label>
-            <span>Name</span>
-            <input type="text" name="name">
-        </label>
-        <label>
-            <span>Name_chi</span>
-            <input type="text" name="name_chi">
-        </label>
-        <input type="submit" value="add">
-    </form>
+
 </body>
+
 </html>
