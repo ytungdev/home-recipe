@@ -36,6 +36,14 @@ def index():
         data["dish"].append(obj)
     return render_template('main.html', data=data)
 
+@app.get('/dishes')
+def showDishes():
+    result = Dish().getFull()
+    return jsonify(result)
+@app.get('/ingredients')
+def showIngredients():
+    result = Ingredient().getAll()
+    return jsonify(result)
 
 @app.post('/add/dish')
 def add_dish():
