@@ -3,16 +3,14 @@
 Store and represent recipes in Neo4j database.
 
 
----
 
 
-### Technology
+## Technology
 - **Framework** : Flask
 - **Database** : Neo4j
 
----
 
-### Functions
+## Functions
 
 - Add **ingredient** (Neo4j `node`) with
     -  _name_ and _name_chi_ (Neo4j `properties`)
@@ -21,21 +19,21 @@ Store and represent recipes in Neo4j database.
     -   _name_ and _name_chi_ (Neo4j `properties`)
     -   _category_ and _style_ (Neo4j `properties`)
 - Ingredient suggestion when start typing in "Add recipe > ingredient" (Neo4j `FULLTEXT` search)
-- API endpoint:
-    >  `GET /dishes` : retrieve all dishes in json format, sorted by _category_, _style_
+
     
-    >  `POST /add/dish` : add new dish
-    
-    >  `GET /ingredients` : retrieve all ingredients in json format
-    
-    >  `POST /add/ingredient` : add new ingredient
-    
-    >  `POST /search` :  full-text search ingredient with given string
-    
----
-    
-#### Usage
+## Usage
 
 ```
 python main.py
 ```
+
+## API
+>  `GET /dishes` : retrieve all dishes in json format, sorted by _category_, _style_
+    
+>  `POST /add/dish` : add new dish
+    
+>  `GET /ingredients` : retrieve all ingredients in json format
+    
+>  `POST /add/ingredient` : add new ingredient
+    
+>  `POST /search` :  full-text search ingredient with given string
