@@ -5,7 +5,7 @@ Store and represent recipes in Neo4j database.
 
 
 
-## Technology
+## Technologies
 - **Framework** : Flask
 - **Database** : Neo4j
 
@@ -27,7 +27,7 @@ Store and represent recipes in Neo4j database.
 python main.py
 ```
 
-## API
+## APIs
 >  `GET /dishes` : retrieve all dishes in json format, sorted by _category_, _style_
     
 >  `POST /add/dish` : add new dish
