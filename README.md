@@ -1,6 +1,6 @@
-# home-menu
+# home-recipe
 
-Save dishes that you can cook and make it visible. Make weekly menu easier to plan.
+Store and represent recipes in Neo4j database.
 
 
 
