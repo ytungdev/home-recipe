@@ -5,8 +5,6 @@ import os
 from dotenv import load_dotenv
 
 
-app = Flask(__name__)
-app.secret_key = b'1233211234567'
 
 
 load_dotenv()
@@ -15,30 +13,20 @@ USERNAME = os.getenv('DATABASE_USERNAME')
 PASSWORD = os.getenv('DATABASE_PASSWORD')
 db = DBconnection(URL, USERNAME, PASSWORD)
 
+app = Flask(__name__)
+app.secret_key = bytes(os.getenv('APP_SECRET_KEY'), 'UTF-8')
 
 @app.route('/')
 def index():
     data = {
-        "dish":[],
+        "dish":Dish().getAll(),
         "ingredient": Ingredient().getAll()
     }
-    dishs = Dish().getAll()
-    for n in dishs:
-        ingr = Dish().getIngredient(n['name'])
-        obj = {
-            "name" : Dish.format(n['name']),
-            "name_chi" : Dish.format(n['name_chi'], True),
-            'ingredient':[ {
-                "name":Ingredient.format(i["name"]),
-                "name_chi":Ingredient.format(i["name_chi"], True)
-            } for i in ingr]
-        }
-        data["dish"].append(obj)
     return render_template('main.html', data=data)
 
 @app.get('/dishes')
 def showDishes():
-    result = Dish().getFull()
+    result = Dish().getStructure()
     return jsonify(result)
 @app.get('/ingredients')
 def showIngredients():
@@ -49,8 +37,10 @@ def showIngredients():
 def add_dish():
     name = request.form['name']
     name_chi = request.form['name_chi']
+    category = request.form['category']
+    style = request.form['style']
     ingredients = request.form.getlist('ingredients[]')
-    res = Dish().add(name,name_chi, ingredients)
+    res = Dish().add(name,name_chi,category,style, ingredients)
     print(f"add d : '{name}', '{name_chi}', '{ingredients}'")
     print(res)
     if not res:

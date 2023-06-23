@@ -16,9 +16,34 @@
             padding: 10px;
         }
 
-        .name{
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .name {
             display: inline-block;
             width: 100px
+        }
+
+        label {
+            display: inline-block;
+            /* width: 230px; */
+            margin-right: 5px;
+        }
+
+        label span {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .option {
+            border: 1px solid grey;
+            width: 250px;
+        }
+
+        .option input[type=button] {
+            float: right;
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
@@ -36,7 +61,7 @@
                     $('#suggestions').html("");
                     for (i of res) {
                         if (!(selected.includes(i.name))) {
-                            $('#suggestions').append(`<p>
+                            $('#suggestions').append(`<p class="option">
                                 <span class="name">${i.name}</span>
                                 <span class="name"> ${i.name_chi}</span>
                                 <input type="button" value="+" 
@@ -72,9 +97,9 @@
             let name = item.dataset.name;
             let name_chi = item.dataset.name_chi;
             selected.push(name)
-            $('#selected').append(`<p>
-                    <span class="name">${i.name}</span>
-                    <span class="name"> ${i.name_chi}</span>
+            $('#selected').append(`<p class="option">
+                    <span class="name">${name}</span>
+                    <span class="name"> ${name_chi}</span>
                     <input type="hidden" value="${name}" name="ingredients[]">
                     <input type="button" value="x" 
                         data-name="${name}" 
@@ -84,7 +109,7 @@
             $('#suggestions').html('');
         }
 
-        function remove(item){
+        function remove(item) {
             let name = item.dataset.name;
             const index = selected.indexOf(name);
             selected.splice(index, 1);
@@ -101,7 +126,7 @@
         {% for dish in data['dish'] %}
         <li>{{dish["name"]}} {{dish["name_chi"]}}
             <ul>
-                {% for ing in dish["ingredient"] %}
+                {% for ing in dish["ingredients"] %}
                 <li>{{ing["name"]}} {{ing["name_chi"]}}</li>
                 {% endfor %}
             </ul>
@@ -110,32 +135,56 @@
     </ul>
     <div class="form">
         <span><b>Add</b></span>
+        <hr>
+        {% with msgs = get_flashed_messages(category_filter=["dish"]) %}
+        {% if msgs %}
+        <div class="alert-message block-message error">
+            <ul>
+                {% for msg in msgs %}
+                <li>{{ msg }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
         <form method="post" action="{{url_for('add_dish')}}">
-            <label>
-                <span>Name</span>
-                <input type="text" name="name">
-            </label>
-            <label>
-                <span>Name_chi</span>
-                <input type="text" name="name_chi">
-            </label>
-            <input type="submit" value="add">
-            {% with msgs = get_flashed_messages(category_filter=["dish"]) %}
-            {% if msgs %}
-            <div class="alert-message block-message error">
-                <ul>
-                    {% for msg in msgs %}
-                    <li>{{ msg }}</li>
-                    {% endfor %}
-                </ul>
+            <div class="container">
+                <label>
+                    <span>Category</span>
+                    <!-- <input type="text" name="category"> -->
+                    <select name="category">
+                        <option value="">----</option>
+                        {% for opt in ['breakfast', 'lunch', 'dinner', 'soup'] %}
+                        <option value="{{opt}}">{{opt}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    <span>Style</span>
+                    <!-- <input type="text" name="style"> -->
+                    <select name="style">
+                        <option value="">----</option>
+                        {% for opt in ['western', 'eastern', 'japanese', 'other'] %}
+                        <option value="{{opt}}">{{opt}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    <span>Name*</span>
+                    <input type="text" name="name">
+                </label>
+                <label>
+                    <span>Name_chi</span>
+                    <input type="text" name="name_chi">
+                </label>
+                <label>
+                    <span>Ingredient</span>
+                    <input id="inp" type="text" onkeyup="search(this.value)">
+                </label>
+                <div>
+                    <input type="submit" value="add">
+                </div>
             </div>
-            {% endif %}
-            {% endwith %}
-            <br>
-            <label>
-                <span>Ingredient</span>
-            </label>
-            <input id="inp" type="text" onkeyup="search(this.value)">
             <div id="selected"></div>
             <div id="suggestions"></div>
         </form>
@@ -150,9 +199,21 @@
     </ul>
     <div class="form">
         <span><b>Add</b></span>
+        <hr>
+        {% with msgs = get_flashed_messages(category_filter=["ingredient"]) %}
+        {% if msgs %}
+        <div class="alert-message block-message error">
+            <ul>
+                {% for msg in msgs %}
+                <li>{{ msg }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
         <form method="post" action="{{url_for('add_ingredient')}}">
             <label>
-                <span>Name</span>
+                <span>Name*</span>
                 <input type="text" name="name">
             </label>
             <label>
@@ -160,17 +221,7 @@
                 <input type="text" name="name_chi">
             </label>
             <input type="submit" value="add">
-            {% with msgs = get_flashed_messages(category_filter=["ingredient"]) %}
-            {% if msgs %}
-            <div class="alert-message block-message error">
-                <ul>
-                    {% for msg in msgs %}
-                    <li>{{ msg }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% endwith %}
+
         </form>
     </div>
     <hr>

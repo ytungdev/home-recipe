@@ -19,7 +19,7 @@ class Ingredient:
         }
     
     def getAll(self):
-        q = 'MATCH (n:Ingredient) RETURN n as result'
+        q = 'MATCH (n:Ingredient) RETURN n as result ORDER BY id(n)'
         res = db.query(q)
         return [self.serialize_reulst(record.data()) for record in res]
 
@@ -49,6 +49,15 @@ class Dish:
         else:
             return name if name == "" else f"({name})"
 
+    @staticmethod
+    def formatObj(obj, chi=False):
+        if 'name' in obj:
+            obj['name'] = obj['name'].capitalize()
+        if 'name_chi' in obj:
+            if obj['name_chi'] != '':
+                obj['name_chi'] = f"({obj['name_chi']})"
+        return obj
+
     def serialize_reulst(self, data):
         # print(data)
         return {
@@ -57,31 +66,49 @@ class Dish:
         }
 
     def getAll(self):
-        q = 'MATCH (n:Dish) RETURN n as result'
-        res = db.query(q)
-        return [self.serialize_reulst(record.data()) for record in res]
-    
-    def getFull(self):
         q = 'MATCH p=(n:Dish)-[]->(i:Ingredient) RETURN p as result'
         res = db.query(q)
         serialize_reulst = []
-        obj = {}
-        for i in range(len(res)):
-            data = res[i].data()['result']
-            if i == 0:
+        idx = {}
+        dish_count = 0
+        for r in res:
+            data = r.data()['result']
+            id = data[0]['name']
+            if id not in idx:
+                idx[id] = dish_count
                 obj = data[0]
                 obj['ingredients'] = []
-            if obj['name'] != data[0]['name']:
                 serialize_reulst.append(obj)
-                obj = data[0]
-                obj['ingredients'] = []                
-            obj['ingredients'].append(data[2])
-            if i == len(res)-1:
-                serialize_reulst.append(obj)
-        
-        for i in serialize_reulst:
-            print(i)
+                target = serialize_reulst[dish_count]['ingredients']
+                dish_count +=1
+            else:
+                i = idx[id]
+                target = serialize_reulst[i]['ingredients']                
+
+            target.append(data[2])
         return serialize_reulst
+    
+    def getStructure(self):
+        # return self.getAll()
+        q = 'MATCH p=(n:Dish)-[]->(i:Ingredient) RETURN p as result'
+        res = db.query(q)
+        result = {}
+        for r in res:
+            data = r.data()['result']
+            id = data[0]['name']
+            cat = data[0]['category']
+            style = data[0]['style']
+            if cat not in result:
+                result[cat] = {}
+            if style not in result[cat]:
+                result[cat][style] = {}
+            if id not in result[cat][style]:
+                result[cat][style][id] = data[0]            
+                result[cat][style][id]['ingredients'] = []
+            
+            result[cat][style][id]['ingredients'].append(data[2])
+        return result
+
 
     def getIngredient(self, name):
         q = f'MATCH (d:Dish{{name:\"{name}\"}})-[:USE]->(i:Ingredient) RETURN i as result'
@@ -89,13 +116,13 @@ class Dish:
         res = db.query(q)
         return [self.serialize_reulst(record.data()) for record in res]
 
-    def add(self, name, name_chi, ingredients):
+    def add(self, name, name_chi, category,style, ingredients):
         if name == '':
             return 'name error'
         for i in ingredients:
             q = f"""
             MERGE (i:Ingredient{{name:"{i}"}})
-            MERGE (d:Dish{{name:"{name}",name_chi:"{name_chi}"}})
+            MERGE (d:Dish{{name:"{name}",name_chi:"{name_chi}",category:"{category}",style:"{style}"}})
             MERGE (d)-[:USE]->(i)
             RETURN d
             """
